@@ -18,3 +18,6 @@ requires "nim >= 1.0.0", "nimgl >= 1.1.1"
 
 task debug, "":
   exec "nim c --outdir:debug --lineDir:on --debuginfo:on --debugger:native src/graphics.nim"
+
+task build, "":
+  exec "nim c --ourdir:bin src/graphics.nim"
