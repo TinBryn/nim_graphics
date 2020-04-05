@@ -1,26 +1,59 @@
-import nimgl/[glfw,opengl], glm, shaders
+import nimgl/[glfw,opengl], glm, shaders, glsugar
 
-var triangle = [
-  vec3f(-0.5, -0.5, 0.0),
-  vec3f(0.5, -0.5, 0.0),
-  vec3f(0.0, 0.5, 0.0)
-]
+proc setupCallbacks(window: GLFWwindow) =
+  proc keyboard(window: GLFWwindow, key, code, action, mods: int32) {.cdecl.} =
+    if glfw.toGLFWKey(key) == GLFWKey.ESCAPE:
+      window.setWindowShouldClose(true)
+  discard setKeyCallback(window, keyboard)
 
-if not glfwInit():
-  quit("GLFW initialisation failed")
+proc main =
+  var triangle = [
+    vec3f(-0.5, -0.5, 0.0),
+    vec3f(0.5, -0.5, 0.0),
+    vec3f(0.0, 0.5, 0.0)
+  ]
 
-let window = glfwCreateWindow(800, 600, "Window", nil, nil, false)
-window.makeContextCurrent()
-assert glInit()
-glClearColor(0.2f, 0.3f, 0.4f, 1.0f)
+  if not glfwInit():
+    quit("GLFW initialisation failed")
 
-var vbo: uint32
-glGenBuffers(1, addr vbo)
+  let window = glfwCreateWindow(800, 600, "Window", nil, nil, false)
 
-glBindBuffer(GL_ARRAY_BUFFER, vbo)
-glBufferData(GL_ARRAY_BUFFER, sizeof triangle, addr triangle[0], GL_STATIC_DRAW)
+  setupCallbacks(window)
 
-while not window.windowShouldClose():
-  glfwPollEvents()
-  glClear(GL_COLOR_BUFFER_BIT)
-  window.swapBuffers()
+  window.makeContextCurrent()
+  assert glInit()
+  glClearColor(0.2f, 0.3f, 0.4f, 1.0f)
+
+  var shader = createShader(vertexSource, fragmentSource)
+
+  let location_aPos = shader["aPos"]
+
+  shader.use()
+
+  const
+    nVAOs = 1
+    nVBOs = 1
+
+  var
+    vao: array[nVAOs, uint32]
+    vbo: array[nVBOs, uint32]
+  glGenVertexArrays(nVAOs, addr vao[0])
+  glGenBuffers(nVBOs, addr vbo[0])
+
+  glBindVertexArray(vao[0])
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[0])
+  glBufferData(GL_ARRAY_BUFFER, sizeof triangle, addr triangle[0], GL_STATIC_DRAW)
+
+  vertexAttribPointer(location_aPos, 3, GLfloat, false, 3 * sizeof(GLfloat), 0)
+  glEnableVertexAttribArray(location_aPos)
+
+  glPolygonMode(GLFrontAndBack, GLLine)
+
+  while not window.windowShouldClose():
+    glfwPollEvents()
+    glClear(GL_COLOR_BUFFER_BIT)
+    glDrawArrays(GLTriangles, 0, triangle.len.GLsizei)
+    window.swapBuffers()
+
+when isMainModule:
+  main()
