@@ -1,10 +1,4 @@
-import nimgl/[glfw,opengl], glm, shaders, glsugar
-
-proc setupCallbacks(window: GLFWwindow) =
-  proc keyboard(window: GLFWwindow, key, code, action, mods: int32) {.cdecl.} =
-    if glfw.toGLFWKey(key) == GLFWKey.ESCAPE:
-      window.setWindowShouldClose(true)
-  discard setKeyCallback(window, keyboard)
+import nimgl/[glfw,opengl], glm, shaders, glsugar, callbacks
 
 proc main =
   var triangle = [
@@ -17,9 +11,7 @@ proc main =
     quit("GLFW initialisation failed")
 
   let window = glfwCreateWindow(800, 600, "Window", nil, nil, false)
-
   setupCallbacks(window)
-
   window.makeContextCurrent()
   assert glInit()
   glClearColor(0.2f, 0.3f, 0.4f, 1.0f)
