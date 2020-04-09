@@ -1,21 +1,27 @@
-import nimgl/opengl, tables
+import nimgl/opengl, tables, glm
 
 type
   Shader* = object
     program: GLuint
-    locations: Table[string, GLuint]
+    attributeLocations: Table[string, GLuint]
+    uniformLocations: Table[string, GLuint]
 
 proc use*(shader: Shader) =
   glUseProgram(shader.program)
 
 proc `[]`*(shader: var Shader, attrib: string): GLuint =
-  if attrib notin shader.locations:
-    shader.locations[attrib] = glGetAttribLocation(shader.program, attrib).Gluint
-  shader.locations[attrib]
+  if attrib notin shader.attributeLocations:
+    shader.attributeLocations[attrib] = glGetAttribLocation(shader.program, attrib).Gluint
+  shader.attributeLocations[attrib]
 
-proc `$`(buf: openArray[char]): string {.used.} =
+proc `{}`*(shader: var Shader, uniform: string): GLuint =
+  if uniform notin shader.uniformLocations:
+    shader.uniformLocations[uniform] = glGetUniformLocation(shader.program, uniform).GLuint
+  shader.uniformLocations[uniform]
+
+proc `$$`(buf: openArray[char]): string {.used.} =
   for c in buf:
-    result &= c
+    result &= $c
 
 proc compileShader(shader: GLuint, source: string) =
   var csource: cstring = source
@@ -26,11 +32,7 @@ proc compileShader(shader: GLuint, source: string) =
   if success == 0:
     var infoLog: array[512, char]
     glGetShaderInfoLog(shader, 512, nil, addr infoLog[0])
-    echo infoLog
-
-const
-  vertexSource* = readFile("shaders/vertex.glsl")
-  fragmentSource* = readFile("shaders/fragment.glsl")
+    echo $$infoLog
 
 template debug(message: varargs[untyped, `$`]) =
   when not defined(release):
@@ -61,4 +63,20 @@ proc createShader*(vertex, fragment: string): Shader =
   program.withShaders(vertexShader, fragmentShader):
     glLinkProgram(program)
   
-  Shader(program: program, locations: initTable[string, GLuint]())
+  Shader(program: program, attributeLocations: initTable[string, GLuint]())
+
+proc setUniform*(shader: var Shader, name: string, value: GLfloat) =
+  let location = shader{name}.GLint
+  glUniform1f(location, value)
+
+proc `{}=`*[T](shader: var Shader, name: string, value: var T) =
+  let location = shader{name}.GLint
+  when T is GLfloat: glUniform1f(location, value)
+  elif T is Vec3: glUniform3fv(location, 1, value.caddr)
+  elif T is Vec4: glUniform4fv(location, 1, value.caddr)
+  elif T is Mat4: glUniformMatrix4fv(location, 1, false, value.caddr)
+
+{.experimental: "dotOperators".}
+
+proc `.=`*[T](shader: var Shader, uniform: string, value: T) =
+  shader{uniform} = value
