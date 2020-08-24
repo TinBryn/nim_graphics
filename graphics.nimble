@@ -12,7 +12,7 @@ bin           = @["graphics"]
 
 # Dependencies
 
-requires "nim >= 1.0.0", "nimgl >= 1.1.1"
+requires "nim >= 1.0.0", "nimgl >= 1.1.1", "glm >= 1.1.1"
 
 # Tasks
 
