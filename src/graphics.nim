@@ -92,7 +92,7 @@ proc main =
   while not window.windowShouldClose():
     glfwPollEvents()
     glClear(GL_COLOR_BUFFER_BIT)
-    shader{"shift"} = shift
+    shader.shift = shift
     shift += 1/32f
     if shift >= 2*PI:
       shift -= 2*PI

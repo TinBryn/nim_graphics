@@ -78,5 +78,5 @@ proc `{}=`*[T](shader: var Shader, name: string, value: var T) =
 
 {.experimental: "dotOperators".}
 
-proc `.=`*[T](shader: var Shader, uniform: string, value: T) =
-  shader{uniform} = value
+template `.=`*[T](shader: var Shader, uniform: untyped, value: var T) =
+  shader.setUniform(astToStr(uniform), value)
