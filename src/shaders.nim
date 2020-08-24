@@ -34,20 +34,14 @@ proc compileShader(shader: GLuint, source: string) =
     glGetShaderInfoLog(shader, 512, nil, addr infoLog[0])
     echo $$infoLog
 
-template debug(message: varargs[untyped, `$`]) =
-  when not defined(release):
-    debugEcho(message)
-
 template withShaders(program: GLuint, shaders: varargs[GLuint], body: untyped): untyped =
   let p = program
   try:
     for s in shaders:
-      debug "attaching shader"
       glAttachShader(p, s)
     body
   finally:
     for s in shaders:
-      debug "detaching shader"
       glDetachShader(p, s)
       glDeleteShader(s)
 
