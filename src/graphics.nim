@@ -1,4 +1,10 @@
-import nimgl/[glfw,opengl], glm, shaders, glsugar, callbacks, constants, math
+import nimgl/[glfw,opengl]
+import glm
+import shaders
+import glsugar
+import callbacks
+import constants
+import math
 
 proc main =
   type Colours = enum
@@ -85,7 +91,7 @@ proc main =
   while not window.windowShouldClose():
     glfwPollEvents()
     glClear(GL_COLOR_BUFFER_BIT)
-    shader.shift = shift
+    # shader.shift = shift
     shift += 1/32f
     if shift >= 2*PI:
       shift -= 2*PI

@@ -1,4 +1,5 @@
-import nimgl/[glfw, opengl]
+import nimgl/glfw
+import opengl
 
 proc setupCallbacks*(window: GLFWWindow) =
   proc keyboard(window: GLFWwindow, key, code, action, mods: int32) {.cdecl.} =

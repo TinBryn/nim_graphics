@@ -1,4 +1,6 @@
-import nimgl/opengl, tables, glm
+import nimgl/opengl
+import tables
+import glm
 
 type
   Shader* = object
